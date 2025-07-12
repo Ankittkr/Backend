@@ -1,0 +1,12 @@
+{
+  "name": "my-backend",
+  "version": "1.0.0",
+  "description": "backend MERN",
+  "license": "ISC",
+  "author": "Ankit kumar",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  }
+}
