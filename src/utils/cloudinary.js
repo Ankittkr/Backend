@@ -12,7 +12,10 @@ import fs from "fs"
             //upload file on cloudinary
             const response =  await cloudinary.uploader.upload(localFilePath , { resource_type:"auto"})
             // file uploaded successfully
-            console.log("File uploaded successfully on cloudinary ", response.url);
+            // console.log("File uploaded successfully on cloudinary ", response.url);
+            fs.unlinkSync(localFilePath)
+            console.log("cloudibary response \n" , response);
+            
             return response
         } catch (error) {
             fs.unlinkSync(localFilePath) // removed the locally saved temporary file at FilelocalPath as the upload operation failed
