@@ -19,4 +19,17 @@ app.use(express.static("public"))
 
 app.use(cookieParser()) //configure to set and access of user broswer by the server
 
+//import routes
+import userRoute from "./routes/user.routes.js"
+
+
+
+
+//declare routes
+app.use("/api/v1/users" , userRoute)    
+
+
+
+
+
 export { app }
