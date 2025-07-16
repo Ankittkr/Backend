@@ -1,7 +1,7 @@
 import { User } from "../models/user.model.js";
 import { ApiError } from "../utils/ApiError.js";
 import { asyncHandler } from "../utils/ayncHandler.js";
-import { jwt } from "jsonwebtoken"
+import jwt from "jsonwebtoken"
 export const verifyJwt = asyncHandler(async (req, _ , next) => { 
     // replaced res with _ if not used
     //get token from either  cookies or from header
