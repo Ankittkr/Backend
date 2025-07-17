@@ -297,14 +297,14 @@ const updateUserAvatar = asyncHandler(async (req, res) => {
     const avatar = await uploadOnCloudinary(avatarLocalPath)
 
     if (!avatar.url) {
-        throw new ApiError(500 , "Error occured while uploading the avatar on cloudinary")
+        throw new ApiError(500, "Error occured while uploading the avatar on cloudinary")
     }
 
     const user = await User.findByIdAndUpdate(
         req.user?._id,
         {
             $set: {
-                avatar : avatar.url
+                avatar: avatar.url
             }
         },
         {
@@ -315,7 +315,7 @@ const updateUserAvatar = asyncHandler(async (req, res) => {
 
     return res
         .status(200)
-        .json(new ApiResponse(200, user ,"avatar updated successfully"))
+        .json(new ApiResponse(200, user, "avatar updated successfully"))
 })
 
 const updateUserCoverImage = asyncHandler(async (req, res) => {
@@ -326,14 +326,14 @@ const updateUserCoverImage = asyncHandler(async (req, res) => {
     const coverImage = await uploadOnCloudinary(coverImageLocalPath)
 
     if (!coverImage.url) {
-        throw new ApiError(500 , "Error occured while uploading the coverImage on cloudinary")
+        throw new ApiError(500, "Error occured while uploading the coverImage on cloudinary")
     }
 
     const user = await User.findByIdAndUpdate(
         req.user?._id,
         {
             $set: {
-                coverImage : coverImage.url
+                coverImage: coverImage.url
             }
         },
         {
@@ -344,9 +344,76 @@ const updateUserCoverImage = asyncHandler(async (req, res) => {
 
     return res
         .status(200)
-        .json(new ApiResponse(200, user ,"cover image updated successfully"))
+        .json(new ApiResponse(200, user, "cover image updated successfully"))
 })
 
+const getUserChannelProfile = asyncHandler(async (req, res) => {
+    const { username } = req.params
+    if(!username?.trim()){
+        throw new ApiError(400 ,"username is missing")
+    }
+    const channel = await User.aggregate([
+        {
+            $match: {
+                username: username?.toLowerCase()
+            }
+        },
+        {
+            $lookup: {
+                from: "subscriptions",
+                localField: "_id",
+                foreignField: "channel",
+                as: "subscribers"
+            }
+        },
+        {
+            $lookup: {
+                from: "subscriptions",
+                localField: "_id",
+                foreignField: "subscriber",
+                as: "subscribedTo"
+            }
+        },
+        {
+            $addFields : {
+                subscribersCount : {
+                    $size : "$subscribers"
+                },
+                subscribeToChannelCount:{
+                    $size : "$subscribedTo"
+                },
+                isSubscribed : {
+                    $cond : {
+                        if :{$in : [req.user?._id , "$subscribers.subscriber"] },
+                        then : true,
+                        else : false
+                    }
+                }
+                
+            }
+        },
+        {
+            $project : {
+                "fullname" : 1,
+                "username" : 1,
+                "email" : 1,
+                "coverImage" : 1,
+                "subscriberCount" : 1,
+                "isSubscribed" : 1,
+                "subscribeToChannelCount" : 1
+
+            }
+        }
+    ])
+    if(!channel?.length){
+        throw new ApiError(404 , "No channel found")
+    }
+    return res
+    .status(200)
+    .json(
+        new ApiResponse(200 , channel[0] , "Channel fetched successfully")
+    )
+})
 
 
 
@@ -360,5 +427,6 @@ export {
     getCurrentUser,
     updateAccountDetails,
     updateUserAvatar,
-    updateUserCoverImage
+    updateUserCoverImage,
+    getUserChannelProfile,
 }
